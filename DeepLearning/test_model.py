@@ -1,22 +1,18 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import urllib
 import numpy as np
-import zipfile
 import os
-from scipy.io import wavfile
-from skimage.data import coffee
-from skimage.transform import resize as imresize
 import pickle
 import time
 from sklearn.metrics import precision_recall_fscore_support
+import sys
 
 print sys.argv
 testing_folder = sys.argv[1]
 test_labels = sys.argv[3]
 batch = 25
-
-training_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+training_folder)])
+epoch = 20
+testing_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+testing_folder)])
 
 filename = test_labels
 fileObject = open("../"+filename,'r')
@@ -179,7 +175,7 @@ print r
 with tf.Session(graph=g2) as sess1, g2.device('/gpu:0'):
     # To initialize values with saved data
     sess1.run(tf.initialize_all_variables())
-    saver.restore(sess1, "/home/ayush/Documents/xray/DeepLearning/models/my-model-19.ckpt")
+    saver.restore(sess1, os.getcwd()+"/"+sys.argv[4]+"/"+"my-model-"+str(epoch-1)+".ckpt")
 
     for j in range(0,r,25):
         test_img = []

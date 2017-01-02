@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import os
@@ -9,6 +8,7 @@ import sys
 print sys.argv
 training_folder = sys.argv[1]
 train_labels = sys.argv[3]
+mode_folder = sys.argv[4]
 batch = 20
 
 training_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+training_folder)])
@@ -217,9 +217,9 @@ with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
 
         print("--- %s seconds ---" % (time.time() - start_time))
         j=0
-        path_name = "/home/ayush/Documents/xray/DeepLearning/models/my-model-"+str(epoch)+".ckpt"
+        path_name = os.getcwd()+"/"+sys.argv[4]+"/"+"my-model-"+str(epoch)+".ckpt"
         save_path = saver.save(sess2, path_name)
         print path_name,"saved"
         #
 
-# python train.py <training images folder> <save train matrix> <training label pickle> <save model checkpoints>
+# python train.py <training images folder> <save train matrix> <training label pickle> <save model folder>
