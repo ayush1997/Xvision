@@ -1,6 +1,5 @@
 *.json
 *.tfmodel
 *.ckpt
-*.jpg
 *.png
 *.txt
