@@ -11,12 +11,14 @@ import pickle
 import time
 from sklearn.metrics import precision_recall_fscore_support
 
-filename = "training_labels_nodule_only"
-fileObject = open("../"+filename,'r')
-train_labels = pickle.load(fileObject)
-print "train_labels",len(train_labels)
+print sys.argv
+testing_folder = sys.argv[1]
+test_labels = sys.argv[3]
+batch = 25
 
-filename = "testing_labels_nodule_only"
+training_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+training_folder)])
+
+filename = test_labels
 fileObject = open("../"+filename,'r')
 test_labels = pickle.load(fileObject)
 print "test_labels",len(test_labels)
@@ -169,28 +171,34 @@ with g2.as_default():
 
 class_pred = np.array([])
 class_actual=np.array([])
+
+r = (testing_folder_len - (testing_folder_len%25))+1
+print r
+
+
 with tf.Session(graph=g2) as sess1, g2.device('/gpu:0'):
     # To initialize values with saved data
     sess1.run(tf.initialize_all_variables())
     saver.restore(sess1, "/home/ayush/Documents/xray/DeepLearning/models/my-model-19.ckpt")
 
-    for j in range(0,26,25):
+    for j in range(0,r,25):
         test_img = []
 
-        file_Name = "/home/ayush/Documents/xray/DeepLearning/test-features-nodule-only/" + str(j)
+        file_Name = os.getcwd()+"/"+sys.argv[2]+"/"+ str(j)
         fileObject = open(file_Name,'r')
         # load the object from the file into var b
         content_features = pickle.load(fileObject)
 
-        # if j==75:
-        #     test_label = test_labels[j:j+5]
-        #     print "test_label",test_label.shape
-        # else:
-        test_label = test_labels[j:25+j]
-        print "test_label",test_label.shape
+        if j==r-1:
+            test_label = test_labels[j:]
+            print "test_label",test_label.shape
+        else:
+            test_label = test_labels[j:25+j]
+            print "test_label",test_label.shape
 
         acc,pred,s,actual = sess1.run([accuracy,predicted_y,soft,actual_y], feed_dict={x: content_features,y: test_label})
         print acc
+        print s
         print "predicted",pred
         print "actual",actual
 
@@ -208,6 +216,7 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 
 conf_matrix = confusion_matrix(class_actual,class_pred)
+
 print conf_matrix
 print precision_recall_fscore_support(class_actual, class_pred)
 plt.matshow(conf_matrix)
@@ -216,3 +225,6 @@ plt.ylabel('True label')
 plt.xlabel('Predicted label')
 
 plt.show()
+
+
+# python train.py <testing images folder> <save test matrix> <testing label pickle> <save model checkpoints>

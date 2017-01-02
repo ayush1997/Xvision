@@ -1,15 +1,19 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import urllib
 import numpy as np
-import zipfile
 import os
-from scipy.io import wavfile
 from skimage.transform import resize as imresize
 import pickle
 import time
-import pickle
+import sys
 
+print sys.argv
+training_folder = sys.argv[1]
+testing_folder = sys.argv[2]
+batch = 20
+
+training_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+training_folder)])
+testing_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+testing_folder)])
 
 def get_vgg_model():
     # download('https://s3.amazonaws.com/cadl/models/vgg16.tfmodel')
@@ -88,75 +92,82 @@ def get_content_feature(img_4d):
             return content_features
 
 
-# m=0
-# # prepare trainig feature set
-# os.mkdir("/home/ayush/Documents/xray/DeepLearning/features-nodule-only")
-# os.mkdir("/home/ayush/Documents/xray/DeepLearning/test-features-nodule-only")
-# for j in range(0,141,20):
-# # for j in range(1):
-#     img=[]
-#     # labels = []
-#     start_time = time.time()
-#     if j==140:
-#         m = 6
-#     for i in range(j+0,j+20-m):
-#     # for i in range(980,994):
+m=0
+# prepare trainig feature set
+# os.mkdir(os.getcwd()+"/"+sys.argv[3])
+os.mkdir(os.getcwd()+"/"+sys.argv[4])
+
+r = (training_folder_len - (training_folder_len%batch))+1
+print r
+
+for j in range(0,r,20):
+# for j in range(1):
+    img=[]
+    # labels = []
+    start_time = time.time()
+    if j==r-1:
+        m = j+batch-training_folder_len
+        print m
+
+    for i in range(j+0,j+20-m):
+    # for i in range(980,994):
+
+        og = plt.imread(sys.argv[1]+"/"+str(i)+".png")
+        og = preprocess(og)
+        img.append(og)
+    print "j=",j
+
+    x1 = g1.get_tensor_by_name('vgg/images' + ':0')
+
+    img_4d = np.array(img)
+    # img_4d = img_4d.reshape((1,224,244,3))
+    # img_4d = img[np.newaxis]
+
+    print img_4d.shape , "Image Shape"
 #
-#         og = plt.imread("final_train_images_nodule_only/"+str(i)+".png")
-#         og = preprocess(og)
-#         img.append(og)
-#     print "j=",j
+
+    # content_features = content_features.reshape((content_features.shape[0],7*7*512))
+    content_features = get_content_feature(img_4d).reshape((get_content_feature(img_4d).shape[0],7*7*512))
+    print content_features.shape , "Feature Map Shape"
+
+
+    # file_Name = "/home/ayush/Documents/xray/DeepLearning/features-nodule-only/"+str(j)
+    file_Name = os.getcwd()+"/"+sys.argv[3]+"/"+str(j)
+    # open the file for writing
+    fileObject = open(file_Name,'wb')
+
+    # this writes the object a to the
+    # file named 'testfile'
+    pickle.dump(content_features,fileObject)
+
+    # here we close the fileObject
+    fileObject.close()
+
+    print("--- %s seconds ---" % (time.time() - start_time))
+
 #
-#     x1 = g1.get_tensor_by_name('vgg/images' + ':0')
-#
-#     img_4d = np.array(img)
-#     # img_4d = img_4d.reshape((1,224,244,3))
-#     # img_4d = img[np.newaxis]
-#
-#     print img_4d.shape , "Image Shape"
-# #
-#
-#     # content_features = content_features.reshape((content_features.shape[0],7*7*512))
-#     content_features = get_content_feature(img_4d).reshape((get_content_feature(img_4d).shape[0],7*7*512))
-#     print content_features.shape , "Feature Map Shape"
-#
-#
-#     file_Name = "/home/ayush/Documents/xray/DeepLearning/features-nodule-only/"+str(j)
-#     # open the file for writing
-#     fileObject = open(file_Name,'wb')
-#
-#     # this writes the object a to the
-#     # file named 'testfile'
-#     pickle.dump(content_features,fileObject)
-#
-#     # here we close the fileObject
-#     fileObject.close()
-#
-#     print("--- %s seconds ---" % (time.time() - start_time))
-#
-#
+
 
 # prepare test set
+r = (testing_folder_len - (testing_folder_len%25))+1
+print r
 
-for j in range(0,26,25):
+for j in range(0,r,25):
     test_img = []
     start_time = time.time()
     x1 = g1.get_tensor_by_name('vgg/images' + ':0')
-    # if j==25:
-    #
-    #     for i in range(25,31):
-    #
-    #         og = plt.imread("final_test_images_nodule/"+str(i)+".png")
-    #         og = preprocess(og)
-    #         test_img.append(og)
-    #     test_img = np.array(test_img)
-    # else:
-    for i in range(j,j+25):
 
-        og = plt.imread("final_test_images_nodule_only/"+str(i)+".png")
+    if j==r-1:
+        m = j+25-testing_folder_len
+        print m
+
+    for i in range(j+0,j+25-m):
+    # for i in range(980,994):
+
+        og = plt.imread(sys.argv[2]+"/"+str(i)+".png")
         og = preprocess(og)
         test_img.append(og)
-    test_img = np.array(test_img)
+    print "j=",j
 
 
 
@@ -169,8 +180,8 @@ for j in range(0,26,25):
 
     print "new test",test_img.shape
 
-    file_Name = "/home/ayush/Documents/xray/DeepLearning/test-features-nodule-only/"+str(j)
-
+    # file_Name = "/home/ayush/Documents/xray/DeepLearning/test-features-nodule-only/"+str(j)
+    file_Name = os.getcwd()+"/"+sys.argv[4]+"/"+str(j)
     # open the file for writing
     fileObject = open(file_Name,'wb')
 
@@ -182,3 +193,6 @@ for j in range(0,26,25):
     fileObject.close()
 
     print("--- %s seconds ---" % (time.time() - start_time))
+
+
+# python train.py <training images folder> <testing image folder> <save train matrix> <save test matrix>

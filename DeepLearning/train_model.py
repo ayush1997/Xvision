@@ -1,24 +1,24 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import urllib
 import numpy as np
-import zipfile
 import os
-from scipy.io import wavfile
-from skimage.transform import resize as imresize
 import pickle
 import time
+import sys
+
+print sys.argv
+training_folder = sys.argv[1]
+train_labels = sys.argv[3]
+batch = 20
+
+training_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+training_folder)])
 
 
-filename = "training_labels_nodule_only"
+filename = train_labels
 fileObject = open("../"+filename,'r')
 train_labels = pickle.load(fileObject)
 print "train_labels",len(train_labels)
 
-filename = "testing_labels_nodule_only"
-fileObject = open("../"+filename,'r')
-test_labels = pickle.load(fileObject)
-print "test_labels",len(test_labels)
 
 n_input = 25088
 # The number of classes which the ConvNet has to classify into .
@@ -73,17 +73,7 @@ def deprocess(img):
     return np.clip(img * 255, 0, 255).astype(np.uint8)
     # return ((img / np.max(np.abs(img))) * 127.5+127.5).astype(np.uint8)
 
-# net = get_vgg_model()
 
-# labels = net['labels']
-
-# g1 = tf.Graph()
-
-
-# with tf.Session(graph=g1) as sess, g1.device('/cpu:0'):
-#     tf.import_graph_def(net['graph_def'], name='vgg')
-#     # names = [op.name for op in g1.get_operations()]
-# # print names
 epsilon = 1e-3
 g2 = tf.Graph()
 with g2.as_default():
@@ -175,22 +165,8 @@ with g2.as_default():
     saver = tf.train.Saver(max_to_keep=15)
 
 
-def get_content_feature(img_4d):
-    with tf.Session(graph=g1) as sess, g1.device('/gpu:0'):
-
-
-            content_layer = 'vgg/pool5:0'
-            content_features= g1.get_tensor_by_name(content_layer).eval(
-                    session=sess,
-                    feed_dict={x1: img_4d,
-                        'vgg/dropout_1/random_uniform:0': [[1.0]],
-                        'vgg/dropout/random_uniform:0': [[1.0]]
-                    })
-
-            # train_new.append(content_features)
-            print content_features.shape
-            return content_features
-
+r = (training_folder_len - (training_folder_len%batch))+1
+print r
 
 with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
 # sess =  tf.Session(graph=g2)
@@ -205,9 +181,9 @@ with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
 
         start_time = time.time()
 
-        for j in range(0,141,20):
+        for j in range(0,r,20):
 
-            file_Name = "/home/ayush/Documents/xray/DeepLearning/features-nodule-only/" + str(j)
+            file_Name =  os.getcwd()+"/"+sys.argv[2]+"/"+ str(j)
             fileObject = open(file_Name,'r')
             # load the object from the file into var b
             content_features = pickle.load(fileObject)
@@ -219,7 +195,7 @@ with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
 
             print "j=",j
 
-            if j==140:
+            if j==r-1:
                 label = train_labels[j:]
                 print label.shape
             else:
@@ -233,23 +209,17 @@ with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
 
 
             if j % 100==0:
-            #     # print "w1 shape--->",w1[0]
-            #     # print(sess2.run(accuracy, feed_dict={x: test_img,y: test_label}))
-            #     # acc,pred,s,actual = sess2.run([accuracy,predicted_y,soft,actual_y], feed_dict={x: content_features, y:label})
-            #     acc,pred,s,actual = sess2.run([accuracy,predicted_y,soft,actual_y], feed_dict={x: test_img,y: test_label})
-                # print "----------accuracy after: epoch="+str(epoch),"j="+str(j),acc
                 print "----------accuracy after: epoch="+str(epoch),"j="+str(j)
             #     accuracy_list.append(acc)
                 cost.append(cst)
-            #     print "ACCURACY",accuracy_list
+
                 print "COST",cost
-            #     print "predicted",pred
-            #     # print s
-            #     print "Actual",actual
-            # content_features=0
+
         print("--- %s seconds ---" % (time.time() - start_time))
         j=0
         path_name = "/home/ayush/Documents/xray/DeepLearning/models/my-model-"+str(epoch)+".ckpt"
         save_path = saver.save(sess2, path_name)
         print path_name,"saved"
         #
+
+# python train.py <training images folder> <save train matrix> <training label pickle> <save model checkpoints>
