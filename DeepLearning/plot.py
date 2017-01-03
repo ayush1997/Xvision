@@ -1,14 +1,14 @@
-# import matplotlib.pyplot as plt
-# import numpy
-#
-# cost=[1.0144926, 0.96602422, 0.024328001, 0.084135853, 0.016160158, 0.025197307, 0.009908339, 0.01657806, 0.0081786923, 0.013121139, 0.0070881136, 0.011028621, 0.0063030426, 0.0096297041, 0.0056963619, 0.0085926503, 0.005211385, 0.0077778683, 0.0048120469, 0.0071275895, 0.0044746906, 0.006589605, 0.004183189, 0.006135819, 0.0039332267, 0.0057431147, 0.0037121987, 0.0054046381, 0.0035161029, 0.0051041786, 0.0033395544, 0.0048419037, 0.0031820005, 0.0046072733, 0.0030369759, 0.0043934993, 0.0029067376, 0.0042033275, 0.0027854857, 0.0040287729]
-#
-#
-#
-# x = range(0,len(cost),1)
-#
-# plt.plot(x,cost)
-# plt.show()
+import matplotlib.pyplot as plt
+import numpy
+
+cost=[1.0144926, 0.96602422, 0.024328001, 0.084135853, 0.016160158, 0.025197307, 0.009908339, 0.01657806, 0.0081786923, 0.013121139, 0.0070881136, 0.011028621, 0.0063030426, 0.0096297041, 0.0056963619, 0.0085926503, 0.005211385, 0.0077778683, 0.0048120469, 0.0071275895, 0.0044746906, 0.006589605, 0.004183189, 0.006135819, 0.0039332267, 0.0057431147, 0.0037121987, 0.0054046381, 0.0035161029, 0.0051041786, 0.0033395544, 0.0048419037, 0.0031820005, 0.0046072733, 0.0030369759, 0.0043934993, 0.0029067376, 0.0042033275, 0.0027854857, 0.0040287729]
+
+
+
+x = range(0,100*len(cost),100)
+
+plt.plot(x,cost)
+plt.show()
 
 
 # pred=[ 0,0,1,1,0,0,1,0,0,1,0,0,0,0,0,1,0,0,
@@ -95,29 +95,29 @@ actual =[0 ,1 ,1 ,1 ,0 ,1 ,1 ,0 ,1 ,1 ,0 ,1 ,1 ,1 ,0 ,0 ,0 ,1 ,0 ,0 ,0 ,0 ,1 ,1,
 # predicted [1 0 0 1 1 0 0 0 0 0 1 0 0 1 1 0 1 0 1 0 1 1 0 0 0]
 # actual [0 1 0 0 1 1 0 0 1 0 0 0 0 1 1 0 1 0 0 0 0 0 0 0 0]
 
-ind = {"0":"NORMAL","1":"NODULE"}
-import numpy as np
-from math import ceil
-import matplotlib.pyplot as plt
-# plt.style.use('ggplot')
-
-# fig = plt.figure()
-PLOT_ROW_SIZE=3
-PLOT_COLUMNS_SIZE=5
-for i in range(1,16):
-
-    im = plt.imread("final_test_images_calc_nodule_only/"+str(i)+".png")
-
-    plt.subplot(PLOT_ROW_SIZE,PLOT_COLUMNS_SIZE,i)
-    plt.xticks([])
-    plt.yticks([])
-    plt.xlabel("NORMAL : "+str(round(pred_perc[i][0],3))+"| NODULE : "+str(round(pred_perc[i][1],3))+"\n TRUE : "+ ind[str(actual[i])], fontsize=12)
-    plt.imshow(im)
-
-
-
-
-# plt.tick_params(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off')
-# ax.set_xticklabels([])
-# fig.subplots_adjust(bottom=0.08,left = 0.05,right=0.97,top=0.93,wspace = 0.5,hspace = 0.5)
-plt.show()
+# ind = {"0":"NORMAL","1":"NODULE"}
+# import numpy as np
+# from math import ceil
+# import matplotlib.pyplot as plt
+# # plt.style.use('ggplot')
+#
+# # fig = plt.figure()
+# PLOT_ROW_SIZE=3
+# PLOT_COLUMNS_SIZE=5
+# for i in range(1,16):
+#
+#     im = plt.imread("final_test_images_calc_nodule_only/"+str(i)+".png")
+#
+#     plt.subplot(PLOT_ROW_SIZE,PLOT_COLUMNS_SIZE,i)
+#     plt.xticks([])
+#     plt.yticks([])
+#     plt.xlabel("NORMAL : "+str(round(pred_perc[i][0],3))+"| NODULE : "+str(round(pred_perc[i][1],3))+"\n TRUE : "+ ind[str(actual[i])], fontsize=12)
+#     plt.imshow(im)
+#
+#
+#
+#
+# # plt.tick_params(axis='both', which='both', bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off')
+# # ax.set_xticklabels([])
+# # fig.subplots_adjust(bottom=0.08,left = 0.05,right=0.97,top=0.93,wspace = 0.5,hspace = 0.5)
+# plt.show()
