@@ -40,15 +40,9 @@ def get_vgg_model():
                   'See here for info: ' +
                   'https://github.com/tensorflow/tensorflow/issues/582')
 
-    # download('https://s3.amazonaws.com/cadl/models/synset.txt')
-    # with open('synset.txt') as f:
-    #     labels = [(idx, l.strip()) for idx, l in enumerate(f.readlines())]
 
     return {
         'graph_def': graph_def
-        # 'labels': labels
-        # 'preprocess': preprocess,
-        # 'deprocess': deprocess
     }
 
 def preprocess(img, crop=True, resize=True, dsize=(224, 224)):
@@ -223,4 +217,4 @@ plt.xlabel('Predicted label')
 plt.show()
 
 
-# python train.py <testing images folder> <save test matrix> <testing label pickle> <save model checkpoints>
+# python test_model.py <testing images folder> <save test matrix> <testing label pickle> <save model checkpoints>

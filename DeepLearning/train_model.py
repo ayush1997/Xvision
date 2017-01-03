@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import os
@@ -222,4 +223,4 @@ with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
         print path_name,"saved"
         #
 
-# python train.py <training images folder> <save train matrix> <training label pickle> <save model folder>
+# python train_model.py <Training images folder> <Train images codes folder> <Training image labels file> <Folder to save models>
