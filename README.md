@@ -17,6 +17,7 @@ The **maxpool-5** layer of a pretrained **VGGNet-16(Deep Convolutional Neural Ne
 | Learning rate  | 0.01|  
 |Mini Batch Size| 20 |
 | Epochs | 20 |
+|2 Layers| 512x512 |
 |GPU trained on| Nvidia GEFORCE 920M|
 
 ## Evaluation
@@ -39,7 +40,7 @@ The **maxpool-5** layer of a pretrained **VGGNet-16(Deep Convolutional Neural Ne
 The above code can be used for **Deep Transfer Learning** on any Image dataset to train using VggNet as the PreTrained network. 
 ### Steps to follow 
 
-1. Download Data- the script download images and saves corresponfing disease label in json format.
+1. Download Data- the script download images and saves corresponding disease label in json format.
 
   ```python scraper.py <path/to/folder/to/save/images>```
 
