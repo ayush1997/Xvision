@@ -2,7 +2,7 @@
 
 Chest Xray image analysis using **Deep Learning** and  exploiting **Deep Transfer Learning** technique for it with Tensorflow.
 
-The **maxpool-5** layer of a pretrained **VGGNet-16(Deep Convolutional Neural Network)** model has been used as the feature extractor here and then further trained on a **2-layer Deep neural network** for classification of **Normal vs Nodular** Chest Xray Images.
+The **maxpool-5** layer of a pretrained **VGGNet-16(Deep Convolutional Neural Network)** model has been used as the feature extractor here and then further trained on a **2-layer Deep neural network** with **SGD optimizer** and **Batch Normalization** for classification of **Normal vs Nodular** Chest Xray Images.
 
 ## Nodular vs Normal Chest Xray
 <img src="https://github.com/ayush1997/Xvision/blob/master/image/node.jpg" width="300" height="300" />
