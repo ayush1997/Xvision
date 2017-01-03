@@ -73,3 +73,8 @@ The above code can be used for **Deep Transfer Learning** on any Image dataset t
 
 > [Deep Convolutional Neural Networks for Computer-Aided Detection: CNN Architectures,
 Dataset Characteristics and Transfer Learning](https://arxiv.org/pdf/1602.03409.pdf)
+
+## Contribute
+
+If you want to contribute and add new feature feel free to send Pull request [here](https://github.com/ayush1997/Xvision/pulls)
+To report any bugs or request new features, head over to the [Issues page](https://github.com/ayush1997/Xvision/issues)
