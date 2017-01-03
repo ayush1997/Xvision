@@ -3,15 +3,21 @@ import requests
 import re
 import json
 import urllib
+import sys
+
+path = sys.argv[1]
+if path[-1]!="/":
+    path+="/"
+
 
 domain = 'https://openi.nlm.nih.gov/'
 url_list = []
-for i in range(55,75):
+for i in range(0,75):
     url = 'https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x&m='+str(1+100*i)+'&n='+str(100+100*i)
     url_list.append(url)
 regex = re.compile(r"var oi = (.*);")
 final_data = {}
-img_no = 5500
+img_no = 0s
 
 
 def extract(url):
@@ -38,7 +44,7 @@ def extract(url):
     final_data[img_no]['type'] = typ
     final_data[img_no]['items'] = items
     final_data[img_no]['img'] = domain + img
-    urllib.urlretrieve(domain+img, "/home/ayush/Documents/xray/scraper/latest/"+str(img_no)+".png")
+    urllib.urlretrieve(domain+img, path+str(img_no)+".png")
     with open('data_new.json', 'w') as f:
         json.dump(final_data, f)
     print final_data[img_no]
@@ -64,3 +70,6 @@ def main():
 if __name__ == '__main__':
 
     main()
+
+
+#python scraper.py <path to folders>
