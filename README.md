@@ -1,8 +1,8 @@
 # Xvision
 
-This is an implementation of **Deep Transfer Learning** for Chest Xray image analysis using **Deep learning** with Tensorflow.
+Chest Xray image analysis using **Deep Learning** and  exploiting **Deep Transfer Learning** technique for it with Tensorflow.
 
-The **maxpool-5** layer of a pretrained **VGGNet-16** model has been used as the feature extractor here and then further trained on a **2-layer Deep neural network** for classification of **Normal vs Nodular** Chest Xray Images.
+The **maxpool-5** layer of a pretrained **VGGNet-16(Deep Convolutional Neural Network)** model has been used as the feature extractor here and then further trained on a **2-layer Deep neural network** for classification of **Normal vs Nodular** Chest Xray Images.
 
 ## Nodular vs Normal Chest Xray
 <img src="https://github.com/ayush1997/Xvision/blob/master/image/node.jpg" width="300" height="300" />
@@ -20,7 +20,7 @@ The **maxpool-5** layer of a pretrained **VGGNet-16** model has been used as the
 |GPU trained on| Nvidia GEFORCE 920M|
 
 ## Evaluation
-### Confusion Matrix and Tarining error graph
+### Confusion Matrix and Training Error Graph
 
 <img src="https://github.com/ayush1997/Xvision/blob/master/image/cfm.jpg" width="450" height="400" />
 <img src="https://github.com/ayush1997/Xvision/blob/master/image/nodule.jpg" width="400" height="400" />
@@ -31,6 +31,10 @@ The **maxpool-5** layer of a pretrained **VGGNet-16** model has been used as the
 |**Recall**| 0.76 | 0.57692308 |
 
 **Accuracy** 69.3333 %
+
+## DataSet
+[openi.nlm.nih.gov](https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x&m=1&n=101) has a large base of Xray,MRI, CT scan images publically available.Specifically Chest Xray Images have been scraped, Normal and Nodule labbeled images are futher extrated for this task.
+
 ## How to use ?
 The above code can be used for **Deep Transfer Learning** on any Image dataset to train using VggNet as the PreTrained network. 
 ### Steps to follow 
@@ -62,3 +66,10 @@ The above code can be used for **Deep Transfer Learning** on any Image dataset t
 ## Some Predictions
 
 ![Alt text](https://github.com/ayush1997/Xvision/blob/master/image/pred.jpg "Optional Title")
+
+## References
+
+> [Learning to Read Chest X-Rays: Recurrent Neural Cascade Model for Automated Image Annotation](https://arxiv.org/pdf/1603.08486.pdf)
+
+> [Deep Convolutional Neural Networks for Computer-Aided Detection: CNN Architectures,
+Dataset Characteristics and Transfer Learning](https://arxiv.org/pdf/1602.03409.pdf)
