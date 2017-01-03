@@ -1,15 +1,12 @@
 # Xvision
 
-This repo contains the implementation of **Transfer Learning** for Chest Xray image analysis using **Deep learning** with Tensorflow.
+This is an implementation of **Deep Transfer Learning** for Chest Xray image analysis using **Deep learning** with Tensorflow.
 
-The **maxpool-5** layer of a pretrained **VGGNet-16** model has been used as the feature extractor here and then further trained on a 2-layer Deep neural network for classification of **Normal vs Nodular** Chest Xray Images.
+The **maxpool-5** layer of a pretrained **VGGNet-16** model has been used as the feature extractor here and then further trained on a **2-layer Deep neural network** for classification of **Normal vs Nodular** Chest Xray Images.
 
 ## Nodular vs Normal Chest Xray
 <img src="https://github.com/ayush1997/Xvision/blob/master/image/node.jpg" width="300" height="300" />
 <img src="https://github.com/ayush1997/Xvision/blob/master/image/normal.jpg" width="300" height="300" />
-
-
-<img src="https://github.com/ayush1997/Xvision/blob/master/image/cfm.jpg" width="700" height="500" />
 
 ## Some specifications
 
@@ -22,6 +19,18 @@ The **maxpool-5** layer of a pretrained **VGGNet-16** model has been used as the
 | Epochs | 20 |
 |GPU trained on| Nvidia GEFORCE 920M|
 
+## Evaluation
+### Confusion Matrix and Tarining error graph
+
+<img src="https://github.com/ayush1997/Xvision/blob/master/image/cfm.jpg" width="450" height="400" />
+<img src="https://github.com/ayush1997/Xvision/blob/master/image/nodule.jpg" width="400" height="400" />
+
+|     |  **Normal** | **Nodule** |
+|------|---------|---------|
+| **Precision**| 0.7755102| 0.55555556 |
+|**Recall**| 0.76 | 0.57692308 |
+
+**Accuracy** 69.3333 %
 ## How to use ?
 The above code can be used for **Deep Transfer Learning** on any Image dataset to train using VggNet as the PreTrained network. 
 ### Steps to follow 
