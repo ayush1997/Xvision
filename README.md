@@ -69,12 +69,13 @@ The above code can be used for **Deep Transfer Learning** on any Image dataset t
 
 ## References
 
-> [Learning to Read Chest X-Rays: Recurrent Neural Cascade Model for Automated Image Annotation](https://arxiv.org/pdf/1603.08486.pdf)
+> 1. [Learning to Read Chest X-Rays: Recurrent Neural Cascade Model for Automated Image Annotation](https://arxiv.org/pdf/1603.08486.pdf)
 
-> [Deep Convolutional Neural Networks for Computer-Aided Detection: CNN Architectures,
+> 2. [Deep Convolutional Neural Networks for Computer-Aided Detection: CNN Architectures,
 Dataset Characteristics and Transfer Learning](https://arxiv.org/pdf/1602.03409.pdf)
 
 ## Contribute
 
-If you want to contribute and add new feature feel free to send Pull request [here](https://github.com/ayush1997/Xvision/pulls)
+If you want to contribute and add new feature feel free to send Pull request [here](https://github.com/ayush1997/Xvision/pulls) :D
+
 To report any bugs or request new features, head over to the [Issues page](https://github.com/ayush1997/Xvision/issues)
