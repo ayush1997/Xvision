@@ -31,7 +31,7 @@ The **maxpool-5** layer of a pretrained **VGGNet-16(Deep Convolutional Neural Ne
 | **Precision**| 0.7755102| 0.55555556 |
 |**Recall**| 0.76 | 0.57692308 |
 
-**Accuracy** 69.3333 %
+**Accuracy** : **69.3333 %**
 
 ## DataSet
 [openi.nlm.nih.gov](https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x&m=1&n=101) has a large base of Xray,MRI, CT scan images publically available.Specifically Chest Xray Images have been scraped, Normal and Nodule labbeled images are futher extrated for this task.
