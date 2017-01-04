@@ -17,7 +17,7 @@ for i in range(0,75):
     url_list.append(url)
 regex = re.compile(r"var oi = (.*);")
 final_data = {}
-img_no = 0s
+img_no = 0
 
 
 def extract(url):
