@@ -80,3 +80,7 @@ Dataset Characteristics and Transfer Learning](https://arxiv.org/pdf/1602.03409.
 If you want to contribute and add new feature feel free to send Pull request [here](https://github.com/ayush1997/Xvision/pulls) :D
 
 To report any bugs or request new features, head over to the [Issues page](https://github.com/ayush1997/Xvision/issues)
+
+## To-do
+
+- [ ] Implement saliency map or use Deconv for better visualizations. 
