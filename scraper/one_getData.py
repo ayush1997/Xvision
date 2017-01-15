@@ -1,24 +1,22 @@
+#!/usr/bin/env python
 from lxml import html
 import requests
 import re
 import json
 import urllib
 import sys
-#this script parses out the first 76 pages at  https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x
+#this script parses out the 75 pages at  https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x
 #each page contains 100 images with associated data about each
 #then for each of those pages it parses out various bits about each 100 images and then dumps that info to a json file
-#this file is then used by
-
-path = sys.argv[1]
-if path[-1]!="/":
-    path+="/"
+#it also will download each image and dump it to an images directory,
+# this takes a very long time and uses a lot of space
 
 #globals
-domain = 'https://openi.nlm.nih.gov/'
+import settings
 
 #list of urls, each should have ~100 cases per page
 url_list = []
-for i in range(0,75):
+for i in range(0,settings.number_pages):
     url = 'https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x&m='+str(1+100*i)+'&n='+str(100+100*i)
     url_list.append(url)
 
@@ -58,14 +56,18 @@ def extract(url):
     final_data[img_cnt] = {}
     final_data[img_cnt]['type'] = typ
     final_data[img_cnt]['items'] = items
-    final_data[img_cnt]['img'] = domain + img
+    final_data[img_cnt]['img'] = settings.domain + img
 
     #get the image and copy it to filesystem, presumably image 1 corresponds to the first json entry.
     #ineffecient since it writes the entire list to the file every time this function is called
     #it should only be done once, at the end of main, on the other hand if something crashes you will have the latest
     #json file that corresponds to all the images downloaded
-    urllib.urlretrieve(domain + img, path + str(img_cnt) + ".png")
-    with open('data_new1.json', 'w') as f:
+    src_img = settings.domain + img
+    dst_img = settings.images_directory +"/"+ str(img_cnt) + ".png"
+    print ("Getting:" + src_img + " Wrinting to:" + dst_img)
+
+    urllib.urlretrieve(src_img, dst_img)
+    with open(settings.json_data_file, 'w') as f:
         json.dump(final_data, f)
     print final_data[img_cnt]
 
@@ -87,9 +89,15 @@ def main():
         #get list of other pages, all anchors in the footer tag, get the href attribute
         next_page_url = tree.xpath('//footer/a/@href')
 
-        print 'extract'
+        #make sure images directory exits
+        import os
+        try:
+            os.mkdir(settings.images_directory)
+        except:
+            print("directory exists")
+
         #lets get the page of data and complete FS image for a particular case
-        links = [domain + x['nodeRef'] for x in json_data]
+        links = [settings.domain +"/"+ x['nodeRef'] for x in json_data]
         for link in links:
             extract(link)
 
@@ -98,4 +106,4 @@ if __name__ == '__main__':
     main()
 
 
-# #python scraper.py <path to folders>
+# #python one_getData.py <path to folders>
