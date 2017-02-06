@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Xvision.iml" filepath="$PROJECT_DIR$/.idea/Xvision.iml" />
+      <module fileurl="file://$USER_HOME$/mxnet/.idea/mxnet.iml" filepath="$USER_HOME$/mxnet/.idea/mxnet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../mxnet_learning/.idea/mxnet_learning.iml" filepath="$PROJECT_DIR$/../mxnet_learning/.idea/mxnet_learning.iml" />
     </modules>
   </component>
 </project>

@@ -68,7 +68,7 @@ def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
     mod.init_params(initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2))
     mod.set_params(new_args, aux_params, allow_missing=True)
     mod.fit(train, val,
-        num_epoch=8,
+        num_epoch=5,
         batch_end_callback = mx.callback.Speedometer(batch_size, 10),
         kvstore='device',
         optimizer='sgd',
@@ -77,7 +77,7 @@ def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
     return mod.score(val)
 ####################################################################################
 # Then we can start training. We use AWS EC2 g2.8xlarge, which has 8 GPUs.
-# Output may vary
+# Output may varyf
 num_classes = 2
 batch_per_gpu = 8
 num_gpus = 1
