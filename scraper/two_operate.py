@@ -15,7 +15,7 @@ valid_values = ["normal", "opacity", "cardiomegaly", "calcinosis", "lung/hypoinf
 
 #=======================================================================================================================
 # #create a list of all the diagnosis that are one of the above values, otherwise its "missing"
-#  also figure out how many are nodule and normal as these are the images to train on
+#  also figure out how many are nodule and normal as these are the images_all to train on
 #=======================================================================================================================
 all_diagnosis = {}
 numb_normal =0
@@ -64,7 +64,7 @@ labels = sorted([i for i in sort[-4:] if i[0]!="missing"], key=lambda x: x[1])
 print labels
 
 #=======================================================================================================================
-#find all indexes where a particular disease occurs of form { 'diagnosis':[1111,2222,3345...images]}
+#find all indexes where a particular disease occurs of form { 'diagnosis':[1111,2222,3345...images_all]}
 #=======================================================================================================================
 from collections import defaultdict
 index_list = defaultdict(list)
@@ -83,33 +83,16 @@ for key,val in unique_combos.iteritems():
 print "total nodule = "+ str(totnod)
 print "total normal = "+ str(totnorm)
 # =======================================================================================================================
-#Training and testing dictionaries of the form
-# normal, [normal indices]
-# nodule, [nodule indices]
+#Training and testing list of form
+# [normal indices]
+# [nodule indices]
 # =======================================================================================================================
-train_images_dict = defaultdict(list)
-test_images_dict = defaultdict(list)
-
-def get_train_test_sizes(i):
-    length = len(index_list[i])
-    if settings.run_test == True and  length >= settings.run_test_100:
-        length = settings.run_test_100
-
-    train_size = int(settings.trainpercent * length)
-    test_size = int(settings.testpercent * length)
-
-    leftover = length-(train_size + test_size)
-
-    #pick one to add this 1 to
-    train_size += leftover
-
-    return train_size, test_size
+normal_images_list = []
+nodule_images_list = []
 
 for i in index_list:
     if i == "normal":
-        train_size,test_size = get_train_test_sizes(i)
-        train_images_dict["normal"] = index_list[i][0:train_size]
-        test_images_dict["normal"]  = index_list[i][train_size:train_size+test_size]
+        normal_images_list = index_list[i]
     # elif i=="opacity":
     #         train_images_dict["abnormal"]=index_list[i][:354]
     #         test_images_dict["abnormal"] = index_list[i][354:374]
@@ -139,42 +122,24 @@ for i in index_list:
     #         test_images_dict["abnormal"] += index_list[i][146:166]
     #elif i == "nodule" or i== "calcinosis nodule":
     elif "nodule" in i:
-        train_size, test_size = get_train_test_sizes(i)
-        train_images_dict["nodule"] += index_list[i][0:train_size]
-        test_images_dict["nodule"] += index_list[i][train_size:train_size+test_size]
-print "Number nodules train " + str(len(train_images_dict["nodule"]))
-print "Number normal train " + str(len(train_images_dict["normal"]))
-print "Number nodules test" + str(len(test_images_dict["nodule"]))
-print "Number normal test" + str(len(test_images_dict["normal"]))
+        nodule_images_list += index_list[i]
+
+print "Number nodules total " + str(len(nodule_images_list))
+print "Number normal total " + str(len(normal_images_list))
 # =======================================================================================================================
-#create separate directories for above classes
+#create separate directories for above classes and clear them if needed
 #part of making .rec file for mxnet
 #../images_rec/nodule and normal
 # =======================================================================================================================
 #create directories
-import os
-try:
-    os.mkdir(settings.mxnet_rec_dir )
-except OSError as exc:
-    print("imagesrecdir")
-    print exc.strerror
-
-try:
-    os.mkdir(settings.nodule_directory )
-except OSError as exc:
-    print("nodule directory")
-    print exc.strerror
-
-try:
-    os.mkdir(settings.normal_directory )
-except OSError as exc:
-    print("normal directory exists")
-    print exc.strerror
-
-# =======================================================================================================================
-# clear existing image data in ../images_rec/nodule and normal?
-# =======================================================================================================================
 import os, shutil
+def makeDir(dir):
+    try:
+        os.mkdir(dir)
+    except OSError as exc:
+        print("error making "+ dir)
+        print exc.strerror
+
 def clear_folder_files(folder):
     for file in os.listdir(folder):
         file_path = os.path.join(folder, file)
@@ -184,15 +149,47 @@ def clear_folder_files(folder):
                 # elif os.path.isdir(file_path): shutil.rmtree(file_path)
         except Exception as e:
             print(e)
+
+makeDir(settings.mxnet_images_train_dir)
+makeDir(settings.mxnet_images_train_nodule_dir)
+makeDir(settings.mxnet_images_train_normal_dir)
+
+makeDir(settings.mxnet_images_val_dir)
+makeDir(settings.mxnet_images_val_nodule_dir)
+makeDir(settings.mxnet_images_val_normal_dir)
+
+makeDir(settings.mxnet_images_test_dir)
+makeDir(settings.mxnet_images_test_nodule_dir)
+makeDir(settings.mxnet_images_test_normal_dir)
+
+# clear existing image data in
 if (settings.clear_subdirs == True):
-    clear_folder_files(settings.normal_directory)
-    clear_folder_files(settings.nodule_directory)
-# =======================================================================================================================
+    clear_folder_files(settings.mxnet_images_train_nodule_dir)
+    clear_folder_files(settings.mxnet_images_train_normal_dir)
+    clear_folder_files(settings.mxnet_images_val_nodule_dir)
+    clear_folder_files(settings.mxnet_images_val_normal_dir)
+    clear_folder_files(settings.mxnet_images_test_nodule_dir)
+    clear_folder_files(settings.mxnet_images_test_normal_dir)
+#
+# ======================================================================================================================
 # size the image?
-# =======================================================================================================================
+# ======================================================================================================================
 from skimage.transform import resize as imresize
-def preprocess(img, crop=True, resize=True, dsize=(224, 224)):
-    if img.dtype == np.uint8:
+import mxnet as mx
+def preprocess(img, crop=True, resize=True, dsize=(224, 224), scale =True):
+    """
+    :param img:
+    :param crop:
+    :param resize:
+    :param dsize:
+    :param scale:
+    :return:
+    """
+    # compute the mean (Where do I get this number?
+    # img = img-np.array([117,117,117])
+
+    #this scales between -1 and 1 (float 64)
+    if scale == True:
         img = img / 255.0
 
     if crop:
@@ -210,78 +207,159 @@ def preprocess(img, crop=True, resize=True, dsize=(224, 224)):
 
     # convert back to ints
     return np.clip(norm_img * 255, 0, 255).astype(np.uint8)
+
+def addfilesindirtolist(dir, listofimages):
+    """
+    enumerates all files in directory and populates list with their name minus the extension
+    :param dir:
+    :param list:
+    :return:
+    """
+    try:
+        for name in os.listdir(dir):
+            listofimages.append(name)
+    except OSError as exc:
+        print exc.strerror
+
+
+def copyfiles(source_dir, dest_dir, listofimages,  next_image_number, flip = False, crop=True, resize = True, newsize= (224,224) ):
+    """
+    :param source_dir:   where images_all come from  should be settings.images_directory
+    :param dest_dir:   where images_all go to
+    :param listofimages: list of images_all to write to directory of form [111,223,396...]
+    :param next_image_number: the next 'free' number to name an image
+    :param flip: whether to create a flipped version of an image
+    :param crop = True,
+    :param resize = True,
+    :param newsize= (224,224)   default to resnet size
+    :return: total number of files created
+
+    """
+    for img_path in listofimages:
+        fn = "/" + img_path + ".png"
+        try:
+            src_path_img = source_dir + fn
+            dest_path_img = dest_dir + fn
+
+            #lets get the image and process it
+            tmp_img = cv2.imread(src_path_img)
+            tmp_img = preprocess(tmp_img, crop, resize, newsize)
+
+            #now save it
+            cv2.imwrite(dest_path_img, tmp_img)
+
+            #and its flipped counterpart if enabled
+            if flip == True:
+                dest_path_img_flipped = dest_dir + "/" + str(next_image_number) + ".png"
+                tmp_img = cv2.flip(tmp_img, 1)
+                cv2.imwrite(dest_path_img_flipped, tmp_img)
+                next_image_number += 1
+
+        except OSError as exc:
+            print exc.strerror
+
+        #return number of files in this directory
+        return len([name for name in os.listdir('.') if os.path.isfile(name)])
+
+def duplicatefiles(dir, requiredNumberImagesInDir, next_image_number):
+    """
+    for unbalanced datasets (lots of positive few negative) you can even it out by duplicating the negatives until
+    the number equals the positives
+    :param dir:
+    :param requiredNumberImagesInDir:
+    :return:
+    """
+    #get list of files and the total number
+    listFiles = [name for name in os.listdir(dir) if os.path.isfile(name)]
+    numbfilesinDir = len(listFiles)
+
+    #sanity check
+    if numbfilesinDir >= requiredNumberImagesInDir:
+        return
+
+    while(True):
+        for file in listFiles:
+            #read
+            tmp_img = cv2.imread(file)
+
+            #generate newfile
+            new_path_img = dir + "/" + str(next_image_number) + ".png"
+
+            #save to newfile
+            cv2.imwrite(new_path_img, tmp_img)
+
+            next_image_number += 1
+            numbfilesinDir += 1
+            if (numbfilesinDir >= requiredNumberImagesInDir):
+                return
+
 # =======================================================================================================================
 # copy in nodule and normal files to ../images_rec/nodule and normal
 #note that this is an unbalanced dataset (10 to 1) with 211 nodules and 2706 normals
 # =======================================================================================================================
-
-#nodule balance and copy to ../images_rec/nodule
-#first copy them all to folder
-#flip all nodules horizontally (go from 211 to 422)
-#then copy nodule set 6.4 times (6.4*422 = 2700)
-#roughly balanced then
 import cv2
 
 #copy and flip
 images_in_noduledir =[]
 next_image_number = total_images+1
-import shutil
-for img_path in train_images_dict["nodule"]:
-    fn = "/" + img_path + ".png"
-    try:
-        orig_image_path = settings.images_directory + fn
-        copied_image_path = settings.nodule_directory + fn
-        copied_and_flipped_image_path = settings.nodule_directory + "/" + str(next_image_number) + ".png"
 
-        #lets get the image and resize it resnet expects 224,224
-        tmp_img = cv2.imread(orig_image_path)
-        tmp_img = preprocess(tmp_img, crop=True, resize=True, dsize=(224, 224))
+#=================================================================
+#figure out how many images to each split
+normal_train = int(settings.trainpercent * numb_normal)
+normal_test = int(settings.testpercent * numb_normal)
+normal_val = int(settings.valpercent * numb_normal)
 
-        #now save it and its flipped counterpart
-        cv2.imwrite(copied_image_path, tmp_img)
+#if any leftover add back to train
+leftover = numb_normal - normal_train - normal_test - normal_val
+normal_train += leftover
 
-        tmp_img = cv2.flip(tmp_img, 1)
-        cv2.imwrite(copied_and_flipped_image_path, tmp_img)
+nodule_train = int(settings.trainpercent * numb_nodule)
+nodule_test  = int(settings.testpercent  * numb_nodule)
+nodule_val   = int(settings.valpercent   * numb_nodule)
 
-        images_in_noduledir.append(copied_image_path)
-        images_in_noduledir.append(copied_and_flipped_image_path)
-        next_image_number += 1
+#if any leftover add back to train
+leftover = numb_nodule - nodule_train - nodule_test - nodule_val
+nodule_train += leftover
 
-    except OSError as exc:
-        print exc.strerror
+#now figure out how to balance normal and nodule
+#or how many more to add to nodule
+diff = numb_normal - numb_nodule
+diff_train = int(settings.trainpercent * diff)
+diff_test  = int(settings.testpercent  * diff)
+diff_val   = int(settings.valpercent   * diff)
 
-#how many files in dir
-_, _, files = os.walk(settings.nodule_directory).next()
-file_count = len(files)
+leftover = diff - diff_train - diff_test - diff_val
+diff_train += leftover
+#=================================================================
+#create train_list
+normal_train_list = normal_images_list[0:normal_train]
+normal_test_list = normal_images_list[normal_train:normal_test]
+normal_val_list = normal_images_list[normal_test+normal_train :]
 
-#how many times do we duplicate dataset
-numb_times_to_duplicate = numb_normal/(2*numb_nodule) + 1
-while(file_count != numb_normal):
-    for img_path in images_in_noduledir:
-        copied_image_path = settings.nodule_directory + "/" + str(next_image_number) + ".png"
+nodule_train_list = nodule_images_list[0:nodule_train]
+nodule_test_list = nodule_images_list[nodule_train:nodule_test]
+nodule_val_list = nodule_images_list[nodule_test+nodule_train :]
 
-        shutil.copy(img_path, copied_image_path)
+#copy the files
+copyfiles(settings.images_directory, settings.mxnet_images_train_normal_dir, normal_train_list,
+          next_image_number, flip = False, crop=True, resize = True, newsize= (224,224) )
+copyfiles(settings.images_directory, settings.mxnet_images_test_normal_dir, normal_test_list,
+          next_image_number, flip = False, crop=True, resize = True, newsize= (224,224) )
+copyfiles(settings.images_directory, settings.mxnet_images_val_normal_dir, normal_val_list,
+          next_image_number, flip = False, crop=True, resize = True, newsize= (224,224) )
 
-        next_image_number+=1
-        file_count+=1
-        if (file_count == numb_normal):
-            break
+copyfiles(settings.images_directory, settings.mxnet_images_train_nodule_dir, nodule_train_list,
+          next_image_number, flip = True, crop=True, resize = True, newsize= (224,224) )
+copyfiles(settings.images_directory, settings.mxnet_images_test_nodule_dir, nodule_test_list,
+          next_image_number, flip = True, crop=True, resize = True, newsize= (224,224) )
+copyfiles(settings.images_directory, settings.mxnet_images_val_nodule_dir, nodule_val_list,
+          next_image_number, flip = True, crop=True, resize = True, newsize= (224,224) )
 
-# copy normal files to ../images_rec/normal
-for img_path in train_images_dict["normal"]:
-    fn = "/" + img_path + ".png"
-    try:
-        orig_image_path = settings.images_directory + fn
-        copied_image_path = settings.normal_directory + fn
+#now duplicate the nodule files
+duplicatefiles(settings.mxnet_images_train_nodule_dir, nodule_train + diff_train, next_image_number)
+duplicatefiles(settings.mxnet_images_val_nodule_dir, nodule_val + diff_val, next_image_number)
+duplicatefiles(settings.mxnet_images_test_nodule_dir, nodule_test + diff_test, next_image_number)
 
-        # lets get the image and resize it resnet expects 224,224
-        tmp_img = cv2.imread(orig_image_path)
-        tmp_img = preprocess(tmp_img, crop=True, resize=True, dsize=(224, 224))
-
-        # now save it
-        cv2.imwrite(copied_image_path, tmp_img)
-    except OSError as exc:
-        print exc.strerror
 # =======================================================================================================================
 #convert normal and nodule to 0 and 1
 
