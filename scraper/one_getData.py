@@ -29,7 +29,7 @@ img_cnt = 0
 def extract(url):
     '''
     url points to a page with a single medical case, this function extracts where image is and some metadata for later
-    data is stored in a JSON file, this file will be used to download the images
+    data is stored in a JSON file, this file will be used to download the images_all
     :param url:
     :return:
     '''
