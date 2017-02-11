@@ -6,6 +6,7 @@ import numpy as np
 from scipy.misc import imresize
 from skimage.transform import resize as imresize
 import mxnet as mx
+import os
 
 #=======================================================================================================================
 # functions
@@ -245,44 +246,26 @@ if settings.run_test:
 #part of making .rec file for mxnet
 #../images_rec/nodule and normal
 # =======================================================================================================================
-#create directories
-import os, shutil
-def makeDir(dir):
-    try:
-        os.mkdir(dir)
-    except OSError as exc:
-        print("error making "+ dir + "-"+exc.strerror)
+settings.makeDir(settings.mxnet_images_train_dir)
+settings.makeDir(settings.mxnet_images_train_nodule_dir)
+settings.makeDir(settings.mxnet_images_train_normal_dir)
 
-def clear_folder_files(folder):
-    for file in os.listdir(folder):
-        file_path = os.path.join(folder, file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-                # elif os.path.isdir(file_path): shutil.rmtree(file_path)
-        except Exception as e:
-            print(e)
+settings.makeDir(settings.mxnet_images_val_dir)
+settings.makeDir(settings.mxnet_images_val_nodule_dir)
+settings.makeDir(settings.mxnet_images_val_normal_dir)
 
-makeDir(settings.mxnet_images_train_dir)
-makeDir(settings.mxnet_images_train_nodule_dir)
-makeDir(settings.mxnet_images_train_normal_dir)
-
-makeDir(settings.mxnet_images_val_dir)
-makeDir(settings.mxnet_images_val_nodule_dir)
-makeDir(settings.mxnet_images_val_normal_dir)
-
-makeDir(settings.mxnet_images_test_dir)
-makeDir(settings.mxnet_images_test_nodule_dir)
-makeDir(settings.mxnet_images_test_normal_dir)
+settings.makeDir(settings.mxnet_images_test_dir)
+settings.makeDir(settings.mxnet_images_test_nodule_dir)
+settings.makeDir(settings.mxnet_images_test_normal_dir)
 
 # clear existing image data in
 if (settings.clear_subdirs == True):
-    clear_folder_files(settings.mxnet_images_train_nodule_dir)
-    clear_folder_files(settings.mxnet_images_train_normal_dir)
-    clear_folder_files(settings.mxnet_images_val_nodule_dir)
-    clear_folder_files(settings.mxnet_images_val_normal_dir)
-    clear_folder_files(settings.mxnet_images_test_nodule_dir)
-    clear_folder_files(settings.mxnet_images_test_normal_dir)
+    settings.clear_folder_files(settings.mxnet_images_train_nodule_dir)
+    settings.clear_folder_files(settings.mxnet_images_train_normal_dir)
+    settings.clear_folder_files(settings.mxnet_images_val_nodule_dir)
+    settings.clear_folder_files(settings.mxnet_images_val_normal_dir)
+    settings.clear_folder_files(settings.mxnet_images_test_nodule_dir)
+    settings.clear_folder_files(settings.mxnet_images_test_normal_dir)
 
 import cv2
 

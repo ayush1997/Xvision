@@ -4,7 +4,8 @@ import requests
 import re
 import json
 import urllib
-import sys
+import os
+
 #this script parses out the 75 pages at  https://openi.nlm.nih.gov/gridquery.php?q=&it=x,xg&sub=x
 #each page contains 100 images with associated data about each
 #then for each of those pages it parses out various bits about each 100 images and then dumps that info to a json file
@@ -26,7 +27,7 @@ final_data = {}
 img_cnt = 0
 
 
-def extract(url):
+def extract(url,imgDir):
     '''
     url points to a page with a single medical case, this function extracts where image is and some metadata for later
     data is stored in a JSON file, this file will be used to download the images_all
@@ -63,7 +64,7 @@ def extract(url):
     #it should only be done once, at the end of main, on the other hand if something crashes you will have the latest
     #json file that corresponds to all the images downloaded
     src_img = settings.domain + img
-    dst_img = settings.images_directory +"/"+ str(img_cnt) + ".png"
+    dst_img = os.path.join(imgDir, str(img_cnt) + ".png")
     print ("Getting:" + src_img + " Wrinting to:" + dst_img)
 
     urllib.urlretrieve(src_img, dst_img)
@@ -71,8 +72,14 @@ def extract(url):
         json.dump(final_data, f)
     print final_data[img_cnt]
 
-
 def main():
+    # first create the directory for lst and rec files
+    root = os.path.abspath(os.path.dirname(__file__))
+    imgDir = os.path.join(root, settings.images_directory)
+
+    # make sure images directory exits
+    settings.makeDir(settings.images_directory)
+
     for url in url_list :
         response_info = requests.get(url)
         tree = html.fromstring(response_info.text)
@@ -89,21 +96,13 @@ def main():
         #get list of other pages, all anchors in the footer tag, get the href attribute
         next_page_url = tree.xpath('//footer/a/@href')
 
-        #make sure images directory exits
-        import os
-        try:
-            os.mkdir(settings.images_directory)
-        except:
-            print("directory exists")
-
         #lets get the page of data and complete FS image for a particular case
         links = [settings.domain +"/"+ x['nodeRef'] for x in json_data]
         for link in links:
-            extract(link)
+            extract(link,imgDir)
 
 if __name__ == '__main__':
-
     main()
 
 
-# #python one_getData.py <path to folders>
+# #python A1_getRawImages.py <path to folders>

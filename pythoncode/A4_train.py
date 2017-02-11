@@ -1,27 +1,45 @@
 #!/usr/bin/env python
 
 import mxnet as mx
+import settings
 
 #define the function which returns the data iterators.
 def get_iterators(batch_size, data_shape=(3, 224, 224)):
+    # first create the directory for lst and rec files
+    root = os.path.abspath(os.path.dirname(__file__))
+    recordIODir = os.path.join(root, settings.record_IO_directory)
+    train  = os.path.join(recordIODir, 'Train.rec')
+    val = os.path.join(recordIODir, 'Val.rec')
+
     train = mx.io.ImageRecordIter(
-        path_imgrec         = './mydata1_train.rec',
+        path_imgrec         = '../recordIO_dir/Train.rec',
         data_name           = 'data',
         label_name          = 'softmax_label',
         batch_size          = batch_size,
         data_shape          = data_shape,
         shuffle             = True,
         rand_crop           = True,
-        rand_mirror         = True)
+        rand_mirror         = True,
+        mean_img           = "../recordIO_dir/mean.bin")
     val = mx.io.ImageRecordIter(
-        path_imgrec         = './mydata1_val.rec',
+        path_imgrec         = '../recordIO_dir/Val.rec',
         data_name           = 'data',
         label_name          = 'softmax_label',
         batch_size          = batch_size,
         data_shape          = data_shape,
         rand_crop           = False,
-        rand_mirror         = False)
-    return (train, val)
+        rand_mirror         = False,
+        mean_img="../recordIO_dir/mean.bin")
+    test = mx.io.ImageRecordIter(
+        path_imgrec='../recordIO_dir/Test.rec',
+        data_name='data',
+        label_name='softmax_label',
+        batch_size=batch_size,
+        data_shape=data_shape,
+        rand_crop=False,
+        rand_mirror=False,
+        mean_img="../recordIO_dir/mean.bin")
+    return (train, val,test)
 
 ####################################################################################
 # We then download a pretrained 50-layer ResNet model and load into memory.
@@ -61,30 +79,32 @@ import logging
 head = '%(asctime)-15s %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=head)
 
-def fit(symbol, arg_params, aux_params, train, val, batch_size, num_gpus):
+def fit(symbol, arg_params, aux_params, train, val,test, batch_size, num_gpus):
     devs = [mx.gpu(i) for i in range(num_gpus)]
     mod = mx.mod.Module(symbol=new_sym, context=devs)
     mod.bind(data_shapes=train.provide_data, label_shapes=train.provide_label)
     mod.init_params(initializer=mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2))
     mod.set_params(new_args, aux_params, allow_missing=True)
     mod.fit(train, val,
-        num_epoch=5,
+        num_epoch=1,
         batch_end_callback = mx.callback.Speedometer(batch_size, 10),
         kvstore='device',
         optimizer='sgd',
         optimizer_params={'learning_rate':0.01},
         eval_metric='acc')
-    return mod.score(val)
+    # Evaluate accuracy on val_dataiter
+    metric = mx.metric.Accuracy()
+    return mod.score(test,metric)
 ####################################################################################
 # Then we can start training. We use AWS EC2 g2.8xlarge, which has 8 GPUs.
 # Output may varyf
 num_classes = 2
-batch_per_gpu = 8
+batch_per_gpu = 4
 num_gpus = 1
 
 (new_sym, new_args) = get_fine_tune_model(sym, arg_params, num_classes)
 
 batch_size = batch_per_gpu * num_gpus
-(train, val) = get_iterators(batch_size)
-mod_score = fit(new_sym, new_args, aux_params, train, val, batch_size, num_gpus)
+(train, val,test) = get_iterators(batch_size)
+mod_score = fit(new_sym, new_args, aux_params, train, val,test, batch_size, num_gpus)
 assert mod_score > 0.77, "Low training accuracy."
