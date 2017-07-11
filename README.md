@@ -61,9 +61,10 @@ The above code can be used for **Deep Transfer Learning** on any Image dataset t
 
 5.  Finally the saved models are used for making predictions.Confusion Matrix is used as the Performance Metrics for this classifcation task.
 
-    ```python test_model.py <Testing images folder> <Test images codes folder> <Testing image labels file> <Folder with saved
-    models>```
-
+    ```python test_model.py <Testing images folder> <Test images codes folder> <Testing image labels file> <Folder with saved models>```
+    
+    
+    
 ## Some Predictions
 
 ![Alt text](https://github.com/ayush1997/Xvision/blob/master/image/pred.jpg "Optional Title")
