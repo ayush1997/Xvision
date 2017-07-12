@@ -4,23 +4,24 @@ import numpy as np
 import os
 import pickle
 import time
+from sklearn.metrics import precision_recall_fscore_support
 import sys
 
 print sys.argv
-training_folder = sys.argv[1]
-train_labels = sys.argv[3]
-mode_folder = sys.argv[4]
-batch = 20
-
-training_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+training_folder)])
+testing_folder = sys.argv[1]
+test_labels = sys.argv[3]
 
 
-filename = train_labels
-fileObject = open("../"+filename,'r')
-train_labels = pickle.load(fileObject)
-print "train_labels",len(train_labels)
+batch = 25
+epoch = 20
+testing_folder_len = len([name for name in os.listdir(os.getcwd()+"/"+testing_folder)])
 
+filename = test_labels
+fileObject = open(filename,'r')
+test_labels = pickle.load(fileObject)
+print "test_labels",len(test_labels)
 
+# n_input = 200704
 n_input = 25088
 # The number of classes which the ConvNet has to classify into .
 n_classes = 2
@@ -41,15 +42,9 @@ def get_vgg_model():
                   'See here for info: ' +
                   'https://github.com/tensorflow/tensorflow/issues/582')
 
-    # download('https://s3.amazonaws.com/cadl/models/synset.txt')
-    # with open('synset.txt') as f:
-    #     labels = [(idx, l.strip()) for idx, l in enumerate(f.readlines())]
 
     return {
         'graph_def': graph_def
-        # 'labels': labels
-        # 'preprocess': preprocess,
-        # 'deprocess': deprocess
     }
 
 def preprocess(img, crop=True, resize=True, dsize=(224, 224)):
@@ -146,7 +141,7 @@ with g2.as_default():
     # h_3 = tf.nn.softmax(h_3)
     # h_3 = h_3
 
-    Cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(h_3, y))
+    Cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = h_3, labels=  y))
     optimizer = tf.train.GradientDescentOptimizer(0.01).minimize(Cost)
     # optimizer = tf.train.AdamOptimizer(0.01).minimize(Cost)
 
@@ -163,64 +158,70 @@ with g2.as_default():
 
     # names = [op.name for op in g2.get_operations()]
     # print names
-    saver = tf.train.Saver(max_to_keep=15)
+    saver = tf.train.Saver()
 
 
-r = (training_folder_len - (training_folder_len%batch))+1
+class_pred = np.array([])
+class_actual=np.array([])
+
+r = (testing_folder_len - (testing_folder_len%25))+1
 print r
 
-with tf.Session(graph=g2) as sess2, g2.device('/gpu:0'):
-# sess =  tf.Session(graph=g2)
-    sess2.run(tf.initialize_all_variables())
-    print "shit"
-    # saver.save(sess2, 'my-model')
 
-    accuracy_list=[]
-    cost=[]
-    n_epochs = 20
-    for epoch in range(n_epochs):
+with tf.Session(graph=g2) as sess1:
+    # To initialize values with saved data
+    sess1.run(tf.global_variables_initializer())
+    saver.restore(sess1, os.getcwd()+"/"+sys.argv[4]+"/"+"my-model-"+str(epoch-1)+".ckpt")
 
-        start_time = time.time()
+    for j in range(0,r,25):
+        test_img = []
 
-        for j in range(0,r,20):
+        file_Name = os.getcwd()+"/"+sys.argv[2]+"/"+ str(j)
+        fileObject = open(file_Name,'r')
+        # load the object from the file into var b
+        content_features = pickle.load(fileObject)
+        print content_features.shape
 
-            file_Name =  os.getcwd()+"/"+sys.argv[2]+"/"+ str(j)
-            fileObject = open(file_Name,'r')
-            # load the object from the file into var b
-            content_features = pickle.load(fileObject)
+        if j==r-1:
+            test_label = test_labels[j:]
+            print "test_label",test_label.shape
+        else:
+            test_label = test_labels[j:25+j]
+            print "test_label",test_label.shape
 
-            # print type(content_features)
-            content_features = content_features.reshape((content_features.shape[0],7*7*512))
-            # content_features = content_features.reshape((content_features.shape[0],28*28*256))
-            print content_features.shape , "Feature Map Shape"
+        acc,pred,s,actual = sess1.run([accuracy,predicted_y,soft,actual_y], feed_dict={x: content_features,y: test_label})
+        print acc
+        print s
+        print "predicted",pred
+        print "actual",actual
 
-            print "j=",j
+        # print type(pred)
+        # class_pred+=list(pred)
+        class_pred = np.concatenate((class_pred, pred), axis=0)
+        class_actual = np.concatenate((class_actual, actual), axis=0)
+        # class_actual+=list(actual)
+        print np.unique(class_actual,return_counts=True)
 
-            if j==r-1:
-                label = train_labels[j:]
-                print label.shape
-            else:
-                label = train_labels[j+0:j+20]
-                print label.shape
+print class_pred
+print class_actual
 
-            _,l,w1,cst = sess2.run([optimizer,train_label,W_1,Cost], feed_dict={x: content_features, y:label})
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 
-            print l
-            # print str(epoch) + "-------------------------------------"
+conf_matrix = confusion_matrix(class_actual,class_pred)
+
+print conf_matrix
+prfs = precision_recall_fscore_support(class_actual, class_pred)
+print "precision : ",prfs[0] 
+print "recall : ",prfs[1] 
+print "fscore : ",prfs[2] 
+print "support : ",prfs[3] 
+plt.matshow(conf_matrix)
+plt.colorbar()
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
+
+plt.show()
 
 
-            if j % 100==0:
-                print "----------accuracy after: epoch="+str(epoch),"j="+str(j)
-            #     accuracy_list.append(acc)
-                cost.append(cst)
-
-                print "COST",cost
-
-        print("--- %s seconds ---" % (time.time() - start_time))
-        j=0
-        path_name = os.getcwd()+"/"+sys.argv[4]+"/"+"my-model-"+str(epoch)+".ckpt"
-        save_path = saver.save(sess2, path_name)
-        print path_name,"saved"
-        #
-
-# python train_model.py <Training images folder> <Train images codes folder> <Training image labels file> <Folder to save models>
+# python test_model.py <testing images folder> <save test matrix> <testing label pickle> <save model checkpoints>

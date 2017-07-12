@@ -82,9 +82,7 @@ def get_content_feature(img_4d):
             content_layer = 'vgg/pool5:0'
             content_features= g1.get_tensor_by_name(content_layer).eval(
                     session=sess,
-                    feed_dict={x1: img_4d,
-                        'vgg/dropout_1/random_uniform:0': [[1.0]],
-                        'vgg/dropout/random_uniform:0': [[1.0]]
+                    feed_dict={x1: img_4d
                     })
 
             # train_new.append(content_features)
@@ -95,6 +93,7 @@ def get_content_feature(img_4d):
 m=0
 # prepare trainig feature set
 # os.mkdir(os.getcwd()+"/"+sys.argv[3])
+os.mkdir(os.getcwd()+"/"+sys.argv[3])
 os.mkdir(os.getcwd()+"/"+sys.argv[4])
 
 r = (training_folder_len - (training_folder_len%batch))+1
@@ -139,18 +138,17 @@ for j in range(0,r,20):
     # this writes the object a to the
     # file named 'testfile'
     pickle.dump(content_features,fileObject)
-
-    # here we close the fileObject
-    fileObject.close()
-
+                                                                                                                    
+    # here we close the fileObject                          
+    fileObject.close()                                
+                                                            
     print("--- %s seconds ---" % (time.time() - start_time))
-
-#
 
 
 # prepare test set
 r = (testing_folder_len - (testing_folder_len%25))+1
 print r
+m=0
 
 for j in range(0,r,25):
     test_img = []
@@ -178,7 +176,7 @@ for j in range(0,r,25):
     test_img = get_content_feature(img_4d).reshape((get_content_feature(img_4d).shape[0],7*7*512))
     print "test",test_img.shape
 
-    print "new test",test_img.shape
+    # print "new test",test_img.shape
 
     # file_Name = "/home/ayush/Documents/xray/DeepLearning/test-features-nodule-only/"+str(j)
     file_Name = os.getcwd()+"/"+sys.argv[4]+"/"+str(j)
