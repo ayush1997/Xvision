@@ -61,9 +61,10 @@ The above code can be used for **Deep Transfer Learning** on any Image dataset t
 
 5.  Finally the saved models are used for making predictions.Confusion Matrix is used as the Performance Metrics for this classifcation task.
 
-    ```python test_model.py <Testing images folder> <Test images codes folder> <Testing image labels file> <Folder with saved
-    models>```
-
+    ```python test_model.py <Testing images folder> <Test images codes folder> <Testing image labels file> <Folder with saved models>```
+    
+    
+    
 ## Some Predictions
 
 ![Alt text](https://github.com/ayush1997/Xvision/blob/master/image/pred.jpg "Optional Title")
@@ -80,3 +81,7 @@ Dataset Characteristics and Transfer Learning](https://arxiv.org/pdf/1602.03409.
 If you want to contribute and add new feature feel free to send Pull request [here](https://github.com/ayush1997/Xvision/pulls) :D
 
 To report any bugs or request new features, head over to the [Issues page](https://github.com/ayush1997/Xvision/issues)
+
+## To-do
+
+- [ ] Implement saliency map or use Deconv for better visualizations. 
