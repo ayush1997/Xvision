@@ -54,6 +54,10 @@ The above code can be used for **Deep Transfer Learning** on any Image dataset t
 3. Extract features(**CNN Codes**) from the **maxpool:5** layer of PreTrained CovNet(VggNet) and save them beforehand for faster training of Neural network.
 
     ```python train.py <Training images folder> <Testing image folder> <Train images codes folder > <Test images codes folder>```
+    
+    * Train images codes folder - Path where training images codes will be stored
+    * Test images codes folder - Path where testing images codes will be stored
+    
 
 4.  The extracted features are now used for training our **2-Layer Neural Network** from scratch.The computed models are saved as tensorflow checkpoint after every **Epoch**.
 
